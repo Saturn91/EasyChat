@@ -21,8 +21,11 @@ public class Client implements Runnable{
 	private BufferedReader in;
 
 	private boolean running = true;
+	
+	private String name;
 
-	public Client(int port) {
+	public Client(int port, String name) {
+		this.name = name;
 		Log.printLn("--starting Client--", getClass().getName(), 1);
 		try {
 			client = new Socket("localhost", port);
@@ -34,7 +37,8 @@ public class Client implements Runnable{
 		init();
 	}
 
-	public Client(String inetAdress, int port) {
+	public Client(String inetAdress, int port, String name) {
+		this.name = name;
 		Log.printLn("--starting Client--", getClass().getName(), 1);
 		try {
 			client = new Socket(inetAdress, port);
@@ -60,6 +64,7 @@ public class Client implements Runnable{
 			e.printStackTrace();
 		}
 		new Thread(this).start();
+		out.println("/name:" + name);
 	}
 
 	@Override
@@ -70,27 +75,27 @@ public class Client implements Runnable{
 			{
 				line=in.readLine();
 				if(line==null) break;
-				System.out.println(line);
+				Chat.printLn(line);
 			} catch (IOException e) {}
 		}
+		Chat.printLn(Chat.system + "client closed");
 		Log.printLn("Client-Thread got closed", getClass().getName(), 3);
 	}
 
-	public String getMessage(){
-		String msg = messageRecived;
-		messageRecived = empty;
-		if(msg != empty){
-			return msg;
-		}
-		return null;
-	}
-
 	public void send(String message){
+		out.println(name + ": "+message);
+	}
+	
+	public void sendRaw(String message){
 		out.println(message);
 	}
 
 	public void close(){
 		running = false;
+	}
+
+	public void setName(String name) {
+		this.name = name;		
 	}
 
 

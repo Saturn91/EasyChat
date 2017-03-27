@@ -37,10 +37,9 @@ public class Server {
 						client = new ClientDto(ssocket.accept());
 						clients.put(client.getAddres(), client);
 						onlineCounter ++;
-						System.out.println();
-						Chat.printLn(Chat.system, "Client joined [" + onlineCounter + "] people are online");
+						Chat.printLn("yet unknown Client: " + client.getAddres() + " has joined");
 					} catch (IOException e) {
-						Chat.printLn(Chat.system, "room closed");
+						Chat.printLn(Chat.system + "room closed");
 					}
 				}while(running);	
 				Log.printLn("ServerThread got closed", getClass().getName(), 3);
@@ -71,10 +70,10 @@ public class Server {
 
 	private class ClientDto implements Runnable{
 		private Socket socket;
-		private String name;
+		private String name = null;
 		private String addres;
 		private boolean running = true;
-		
+
 		private BufferedReader in;
 		private PrintWriter out;
 
@@ -111,7 +110,32 @@ public class Server {
 			String s;
 			try {
 				while ((s = in.readLine()) != null) {
-					sendtoAll(s);
+					if(!s.startsWith("/")){
+						sendtoAll(s);
+					}else{
+						if(s.startsWith("/name:")){
+							if(name != null){
+								sendtoAll(Chat.system + name + " has changed to " + s.substring(6));
+							}else{
+								Chat.printLn(getAddres() + " is valid!");
+								sendtoAll(Chat.system + "Client: " + s.substring(6) + " joined [" + onlineCounter + "] people are online");
+							}
+							name = s.substring(6);
+						}else{
+							if(s.startsWith("/kick:")){
+								kick(s.substring(6));
+
+							}else{
+								if(s.startsWith("/del")){
+									delUnknownClients();
+								}else{
+									Chat.printLn(Chat.system + "unknown command: <" + s + ">");
+								}								
+							}
+						}
+
+					}
+
 					if(!running){
 						break;
 					}
@@ -120,7 +144,7 @@ public class Server {
 			}
 
 			// close IO streams, then socket
-			Chat.printLn(name, "left room!");
+			Chat.printLn(Chat.system + ":" + name + " - left room!");
 
 			out.close();
 			try {
@@ -133,9 +157,24 @@ public class Server {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			onlineCounter--;
+			
 			Log.printLn("ClientSocket-Thread " + name + " got closed!", getClass().getName(), 3);
+			Chat.printLn(Chat.system + "[" + onlineCounter + "] people are online");
 		}
-		
+
+		private void delUnknownClients() {
+			int counter = 0;
+			for(ClientDto c: clients.values()){
+				if(c.name == null){
+					counter++;
+					c.close();
+				}
+			}
+			
+			Chat.printLn(Chat.system + "deleted: " + counter + " unknown Clients");
+		}
+
 		public void send(String msg){
 			out.println(msg);
 		}
@@ -160,6 +199,15 @@ public class Server {
 			ssocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void kick(String name){
+		for(ClientDto c: clients.values()){
+			if(c.name.equals(name)){
+				Chat.printLn(Chat.system + "kicked " + name);
+				c.close();
+			}
 		}
 	}
 

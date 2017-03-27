@@ -4,7 +4,8 @@ import java.util.Scanner;
 
 public class Chat {
 	
-	public static final String system= "SYSTEM";
+	public static final String system= "SYSTEM: ";
+	public static final String me = "me: ";
 	
 	private Server server;
 	private String internetAddress;
@@ -16,12 +17,11 @@ public class Chat {
 	private Scanner in;
 	
 	public Chat() {
-		printLn(system, "welcome to easychat");
+		printLn(system + "welcome to easychat");
 		
 		initChat();
 		boolean running = true;
 		while(running){
-			print("me", "");
 			String send = getInput();
 			
 			if(send != null){
@@ -30,14 +30,47 @@ public class Chat {
 				}else{
 					switch(send){
 					case "/stop": running = false; break;
-					default: printLn(system, "unknown command!");
-					}
-					
+					default: 
+						if(send.startsWith("/name:")){
+							client.setName(send.substring(6));
+							client.sendRaw(send);
+						}else{
+							if(send.startsWith("/help")){
+								Chat.printLn(system + ": /help -> open help");
+								Chat.printLn(system + ": /name:newName -> change Name to newName");
+								if(server!=null){
+									Chat.printLn(system + ": /kick:Name -> kick \"Name\"");
+								}							
+							}else{
+								if(send.startsWith("/kick:")){
+									if(server != null){
+										client.sendRaw(send);
+									}else{
+										Chat.printLn(system + "no permission!");
+									}
+								}else{
+									if(send.startsWith("/del")){
+										if(server != null){
+											client.sendRaw(send);
+										}else{
+											Chat.printLn(system + "no permission!");
+										}
+									}else{
+										client.sendRaw(send);
+									}									
+								}
+								
+							}
+						}
+						
+					}					
 				}				
 			}	
 		}
 		
-		server.close();
+		if(server != null){
+			server.close();
+		}		
 		client.close();
 		try {
 			Thread.sleep(1000);
@@ -48,7 +81,12 @@ public class Chat {
 	}
 	
 	private void initChat(){
-		print(system, "Do want to create a room? [y]/[n] ");
+		print(system + "Enter your name: ");
+		String name = null;
+		while(name==null){
+			name = getInput();
+		}
+		print(system + "Do want to create a room? [y]/[n] ");
 		
 		if(getInput().equals("y")){
 			port = -1;
@@ -57,27 +95,29 @@ public class Chat {
 				enterPort();
 				server = new Server(port);
 				if(server == null){
-					printLn(system, "port is already used!");
+					printLn(system + "port is already used!");
 				}else{
 					break;
 				}
 			}
 			
-			printLn(system, "opened a room at: " + server.getIp() + ":" + port);
-			client = new Client(port);
+			printLn(system + "opened a room at: " + server.getIp() + ":" + port);
+			client = new Client(port, name);
 		}else{
 			while(client == null){
-				print(system, "please enter the internet-adress of a chat room: ");
+				print(system + "please enter the internet-adress of a chat room: ");
 				internetAddress = getInput();
 				enterPort();
-				client = new Client(internetAddress, port);
+				client = new Client(internetAddress, port, name);
 				if(client == null){
-					printLn(system, "not able to connect to: " + internetAddress + ":" + port);
+					printLn(system + "not able to connect to: " + internetAddress + ":" + port);
 				}
 			}
 			
-			printLn(system, "connected succesful to Server: " + internetAddress + ":" +port);
-		}	
+			printLn(system + "connected succesful to Server: " + internetAddress + ":" +port);
+		}
+		
+		printLn(system + "enter: /help to see the available commands!");
 	}
 	
 	private void enterPort(){
@@ -85,16 +125,16 @@ public class Chat {
 		port = -1;
 		while(port == -1){
 			testPort = -1;
-			print(system, "please enter a free port: ");
+			print(system + "please enter a free port: ");
 			try {
 				testPort = Integer.parseInt(getInput());
 				if(testPort <= 0 || testPort > 65536){
-					printLn(system, "port out of range!");
+					printLn(system + "port out of range!");
 				}else{
 					port = testPort;
 				}
 			} catch (Exception e) {
-				printLn(system, "your input is not a valid number!");
+				printLn(system + "your input is not a valid number!");
 			}						
 		}
 	}
@@ -104,11 +144,11 @@ public class Chat {
 		return in.nextLine();
 	}
 	
-	public static void printLn(String name, String text){
-		System.out.println("["+Log.getDate()+"] " + name + ": " + text);
+	public static void printLn(String text){
+		System.out.println("["+Log.getDate()+"] " + text);
 	}
 	
-	public static void print(String name, String text){
-		System.out.print("["+Log.getDate()+"] " + name + ": " + text);
+	public static void print(String text){
+		System.out.print("["+Log.getDate()+"] " + text);
 	}
 }
