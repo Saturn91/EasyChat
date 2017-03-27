@@ -50,7 +50,9 @@ public class Server {
 	}
 
 	public void sendtoAll(String msg){
-
+		for(ClientDto c: clients.values()){
+			c.send(msg);
+		}
 	}
 
 	public boolean isValid(){
@@ -72,6 +74,9 @@ public class Server {
 		private String name;
 		private String addres;
 		private boolean running = true;
+		
+		private BufferedReader in;
+		private PrintWriter out;
 
 		public ClientDto(Socket socket) {
 			super();
@@ -88,13 +93,13 @@ public class Server {
 		@Override
 		public void run() {
 			// open up IO streams
-			BufferedReader in = null;
+			in = null;
 			try {
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			PrintWriter out = null;
+			out = null;
 			try {
 				out = new PrintWriter(socket.getOutputStream(), true);
 			} catch (IOException e) {
@@ -106,7 +111,7 @@ public class Server {
 			String s;
 			try {
 				while ((s = in.readLine()) != null) {
-					out.println(s);
+					sendtoAll(s);
 					if(!running){
 						break;
 					}
@@ -129,6 +134,10 @@ public class Server {
 				e.printStackTrace();
 			}
 			Log.printLn("ClientSocket-Thread " + name + " got closed!", getClass().getName(), 3);
+		}
+		
+		public void send(String msg){
+			out.println(msg);
 		}
 
 		public void close(){
