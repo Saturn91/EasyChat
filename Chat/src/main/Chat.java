@@ -38,8 +38,10 @@ public class Chat {
 							if(send.startsWith("/help")){
 								Chat.printLn(system + ": /help -> open help");
 								Chat.printLn(system + ": /name:newName -> change Name to newName");
+								Chat.printLn(system + ": /stop -> end session and close programm");
 								if(server!=null){
-									Chat.printLn(system + ": /kick:Name -> kick \"Name\"");
+									Chat.printLn(system + ": /kick:Name@reason -> kick \"Name\" for \"reason\"");
+									Chat.printLn(system + ": /del -> kick unkown clients");
 								}							
 							}else{
 								if(send.startsWith("/kick:")){

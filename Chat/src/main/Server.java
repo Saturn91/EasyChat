@@ -8,11 +8,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Server {
 	private ServerSocket ssocket;
-	private HashMap<String, ClientDto> clients;
+	private ArrayList<ClientDto> clients;
 	private int onlineCounter = 0;
 
 	private boolean running = true;
@@ -23,7 +24,7 @@ public class Server {
 		} catch (Exception e) {
 			Log.printLn("not able to start Sever", getClass().getName(), 1);
 		}
-		clients = new HashMap<>();
+		clients = new ArrayList<>();
 		Log.printLn("--Server started--", getClass().getName(), 3);
 
 		new Thread(new Runnable() {
@@ -31,13 +32,12 @@ public class Server {
 			@Override
 			public void run() {
 				do{
-					ClientDto client = null;
 					// a "blocking" call which waits until a connection is requested
 					try {
-						client = new ClientDto(ssocket.accept());
-						clients.put(client.getAddres(), client);
+						Socket socket = ssocket.accept();
+						clients.add(new ClientDto(socket));
 						onlineCounter ++;
-						Chat.printLn("yet unknown Client: " + client.getAddres() + " has joined");
+						Chat.printLn("yet unknown Client: " + socket.getInetAddress().getHostAddress() + " has joined");
 					} catch (IOException e) {
 						Chat.printLn(Chat.system + "room closed");
 					}
@@ -49,7 +49,7 @@ public class Server {
 	}
 
 	public void sendtoAll(String msg){
-		for(ClientDto c: clients.values()){
+		for(ClientDto c: clients){
 			c.send(msg);
 		}
 	}
@@ -123,7 +123,13 @@ public class Server {
 							name = s.substring(6);
 						}else{
 							if(s.startsWith("/kick:")){
-								kick(s.substring(6));
+								int reasonCursor = s.indexOf("@");
+								if(reasonCursor != -1){
+									kick(s.substring(6, reasonCursor), s.substring(reasonCursor+1));
+								}else{
+									kick(s.substring(6), "unknown!");
+								}
+								
 
 							}else{
 								if(s.startsWith("/del")){
@@ -144,7 +150,7 @@ public class Server {
 			}
 
 			// close IO streams, then socket
-			Chat.printLn(Chat.system + ":" + name + " - left room!");
+			sendtoAll(Chat.system + ":" + name + " - left room!");
 
 			out.close();
 			try {
@@ -160,12 +166,13 @@ public class Server {
 			onlineCounter--;
 			
 			Log.printLn("ClientSocket-Thread " + name + " got closed!", getClass().getName(), 3);
-			Chat.printLn(Chat.system + "[" + onlineCounter + "] people are online");
+			clients.remove(this);
+			sendtoAll(Chat.system + "[" + onlineCounter + "] people are online");
 		}
 
 		private void delUnknownClients() {
 			int counter = 0;
-			for(ClientDto c: clients.values()){
+			for(ClientDto c: clients){
 				if(c.name == null){
 					counter++;
 					c.close();
@@ -191,8 +198,8 @@ public class Server {
 
 	public void close(){
 		running = false;
-		for(ClientDto c: clients.values()){
-			c.close();
+		for(ClientDto c: clients){
+			kick(c.name, "closing chatroom!");
 		}
 
 		try {
@@ -202,12 +209,18 @@ public class Server {
 		}
 	}
 
-	public void kick(String name){
-		for(ClientDto c: clients.values()){
+	public void kick(String name, String reason){
+		ArrayList<ClientDto> clientsToDel = new ArrayList<>();
+		for(ClientDto c: clients){
 			if(c.name.equals(name)){
 				Chat.printLn(Chat.system + "kicked " + name);
-				c.close();
+				c.send("you got kicked by admin for: " + reason);
+				clientsToDel.add(c);
 			}
+		}
+		
+		for(ClientDto c: clientsToDel){
+			c.close();
 		}
 	}
 
