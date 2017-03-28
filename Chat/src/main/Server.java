@@ -274,7 +274,7 @@ public class Server {
 				c.send("<" + sender + " whispers:> " + msg);
 			}
 		}
-		Chat.printLn("<whispered to:" + sender + "> " + msg);
+		Chat.printLn("<whispered to:" + name + "> " + msg);
 	}
 
 }
