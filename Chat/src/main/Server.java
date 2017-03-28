@@ -154,7 +154,7 @@ public class Server {
 													msg = s.substring(nameEnd+1);
 												}
 												if(name != null && msg != null){
-													whisper(this.name, name, msg);
+													whisper(this, name, msg);
 												}												
 											}else{
 												Chat.printLn(name + ": unknown command: <" + s + ">");
@@ -268,13 +268,13 @@ public class Server {
 		}
 	}
 	
-	public void whisper(String sender, String name, String msg){
+	public void whisper(ClientDto sender, String name, String msg){
 		for(ClientDto c: clients){
 			if(c.getName().equals(name)){
-				c.send("<" + sender + " whispers:> " + msg);
+				c.send("<" + sender.getName() + " whispers:> " + msg);
 			}
 		}
-		Chat.printLn("<whispered to:" + name + "> " + msg);
+		sender.send("<whispered to: " + name + ">: " + msg);
 	}
 
 }
