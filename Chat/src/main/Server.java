@@ -141,8 +141,12 @@ public class Server {
 										}
 										send(online);
 									}else{
-										Chat.printLn(name + ": unknown command: <" + s + ">");
-										send("unknown command: <" + s + ">");
+										if(s.startsWith("/ip")){
+											send("room ip =" + getIp() + ":" + Chat.getPort());
+										}else{
+											Chat.printLn(name + ": unknown command: <" + s + ">");
+											send("unknown command: <" + s + ">");
+										}										
 									}									
 								}								
 							}

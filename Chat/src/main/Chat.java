@@ -3,27 +3,27 @@ package main;
 import java.util.Scanner;
 
 public class Chat {
-	
+
 	public static final String system= "SYSTEM: ";
 	public static final String me = "me: ";
-	
+
 	private Server server;
 	private String internetAddress;
-	
+
 	private Client client;
-	
-	private int port = -1;
+
+	private static int port = -1;
 
 	private Scanner in;
-	
+
 	public Chat() {
 		printLn(system + "welcome to easychat");
-		
+
 		initChat();
 		boolean running = true;
 		while(running){
 			String send = getInput();
-			
+
 			if(send != null){
 				if(!send.startsWith("/")){
 					client.send(send);
@@ -39,6 +39,7 @@ public class Chat {
 								Chat.printLn(system + ": /help -> open help");
 								Chat.printLn(system + ": /name:newName -> change Name to newName");
 								Chat.printLn(system + ": /online -> see who's online");
+								Chat.printLn(system + ": /ip -> see the ip");
 								Chat.printLn(system + ": /stop -> end session and close programm");
 								if(server!=null){
 									Chat.printLn(system + ": /kick:Name@reason -> kick \"Name\" for \"reason\"");
@@ -59,18 +60,20 @@ public class Chat {
 											Chat.printLn(system + "no permission!");
 										}
 									}else{
+
 										client.sendRaw(send);
+
 									}									
 								}
-								
+
 							}
 						}
-						
+
 					}					
 				}				
 			}	
 		}
-		
+
 		if(server != null){
 			server.close();
 		}		
@@ -82,7 +85,7 @@ public class Chat {
 		}
 		System.exit(1);
 	}
-	
+
 	private void initChat(){
 		print(system + "Enter your name: ");
 		String name = null;
@@ -90,10 +93,10 @@ public class Chat {
 			name = getInput();
 		}
 		print(system + "Do want to create a room? [y]/[n] ");
-		
+
 		if(getInput().equals("y")){
 			port = -1;
-			
+
 			while(server == null){
 				enterPort();
 				server = new Server(port);
@@ -103,7 +106,7 @@ public class Chat {
 					break;
 				}
 			}
-			
+
 			printLn(system + "opened a room at: " + server.getIp() + ":" + port);
 			client = new Client(port, name);
 		}else{
@@ -116,13 +119,13 @@ public class Chat {
 					printLn(system + "not able to connect to: " + internetAddress + ":" + port);
 				}
 			}
-			
+
 			printLn(system + "connected succesful to Server: " + internetAddress + ":" +port);
 		}
-		
+
 		printLn(system + "enter: /help to see the available commands!");
 	}
-	
+
 	private void enterPort(){
 		int testPort = -1; 
 		port = -1;
@@ -141,17 +144,21 @@ public class Chat {
 			}						
 		}
 	}
-	
+
 	public String getInput(){
 		in = new Scanner(System.in);
 		return in.nextLine();
 	}
-	
+
 	public static void printLn(String text){
 		System.out.println("["+Log.getDate()+"] " + text);
 	}
-	
+
 	public static void print(String text){
 		System.out.print("["+Log.getDate()+"] " + text);
+	}
+	
+	public static int getPort(){
+		return port;
 	}
 }
