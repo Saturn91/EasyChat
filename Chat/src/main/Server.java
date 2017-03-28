@@ -129,13 +129,21 @@ public class Server {
 								}else{
 									kick(s.substring(6), "unknown!");
 								}
-								
-
 							}else{
 								if(s.startsWith("/del")){
 									delUnknownClients();
 								}else{
-									Chat.printLn(Chat.system + "unknown command: <" + s + ">");
+									if(s.startsWith("/online")){
+										String online = "";
+										String[] chatters = getAllNames();
+										for(int i = 0; i < chatters.length; i++){
+											online += chatters[i] + ", ";
+										}
+										send(online);
+									}else{
+										Chat.printLn(name + ": unknown command: <" + s + ">");
+										send("unknown command: <" + s + ">");
+									}									
 								}								
 							}
 						}
@@ -194,6 +202,10 @@ public class Server {
 			}
 			running = false;
 		}
+		
+		public String getName(){
+			return name;
+		}
 	}
 
 	public void close(){
@@ -207,6 +219,14 @@ public class Server {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String[] getAllNames(){
+		String output[] = new String[onlineCounter];
+		for(int i = 0; i < onlineCounter; i++){
+			output[i] = clients.get(i).getName();
+		}
+		return output;
 	}
 
 	public void kick(String name, String reason){
