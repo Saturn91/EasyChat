@@ -40,7 +40,8 @@ public class Chat {
 								Chat.printLn(system + ": /name:newName -> change Name to newName");
 								Chat.printLn(system + ": /online -> see who's online");
 								Chat.printLn(system + ": /ip -> see the ip");
-								Chat.printLn(system + ": /stop -> end session and close programm");
+								Chat.printLn(system + ": /whisper@name:msg -> whisper only to name");
+								Chat.printLn(system + ": /stop -> end session and close programm");								
 								if(server!=null){
 									Chat.printLn(system + ": /kick:Name@reason -> kick \"Name\" for \"reason\"");
 									Chat.printLn(system + ": /del -> kick unkown clients");

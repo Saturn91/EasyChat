@@ -144,8 +144,22 @@ public class Server {
 										if(s.startsWith("/ip")){
 											send("room ip =" + getIp() + ":" + Chat.getPort());
 										}else{
-											Chat.printLn(name + ": unknown command: <" + s + ">");
-											send("unknown command: <" + s + ">");
+											if(s.startsWith("/whisper@")){
+												int nameStart = s.indexOf("@")+1;
+												int nameEnd = s.indexOf(":");
+												String name = null;
+												String msg = null;
+												if(nameStart != -1 && nameEnd != -1){
+													name = s.substring(nameStart, nameEnd);
+													msg = s.substring(nameEnd+1);
+												}
+												if(name != null && msg != null){
+													whisper(this.name, name, msg);
+												}												
+											}else{
+												Chat.printLn(name + ": unknown command: <" + s + ">");
+												send("unknown command: <" + s + ">");
+											}											
 										}										
 									}									
 								}								
@@ -252,6 +266,15 @@ public class Server {
 		for(ClientDto c: clients){
 			Chat.printLn(Chat.system + c.getName() + ":" + c.getAddres());
 		}
+	}
+	
+	public void whisper(String sender, String name, String msg){
+		for(ClientDto c: clients){
+			if(c.getName().equals(name)){
+				c.send("<" + sender + " whispers:> " + msg);
+			}
+		}
+		Chat.printLn("<whispered to:" + sender + "> " + msg);
 	}
 
 }
