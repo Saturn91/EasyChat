@@ -247,5 +247,11 @@ public class Server {
 			c.close();
 		}
 	}
+	
+	public void printNamesAndIp(){
+		for(ClientDto c: clients){
+			Chat.printLn(Chat.system + c.getName() + ":" + c.getAddres());
+		}
+	}
 
 }

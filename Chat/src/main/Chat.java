@@ -60,15 +60,19 @@ public class Chat {
 											Chat.printLn(system + "no permission!");
 										}
 									}else{
-
-										client.sendRaw(send);
-
+										if(send.startsWith("/online")){
+											if(server != null){
+												server.printNamesAndIp();
+											}else{
+												client.sendRaw(send);
+											}
+										}else{
+											client.sendRaw(send);
+										}										
 									}									
 								}
-
 							}
 						}
-
 					}					
 				}				
 			}	
@@ -92,7 +96,7 @@ public class Chat {
 		while(name==null){
 			name = getInput();
 		}
-		print(system + "Do want to create a room? [y]/[n] ");
+		print(system + "Do you want to create a new room? [y]/[n] ");
 
 		if(getInput().equals("y")){
 			port = -1;
