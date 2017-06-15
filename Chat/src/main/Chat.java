@@ -2,6 +2,8 @@ package main;
 
 import java.util.Scanner;
 
+import gui.GUI;
+
 public class Chat {
 
 	public static final String system= "SYSTEM: ";
@@ -15,8 +17,13 @@ public class Chat {
 	private static int port = -1;
 
 	private Scanner in;
+	
+	private static GUI gui;
 
 	public Chat() {
+		
+		gui = new GUI();
+		
 		printLn(system + "welcome to easychat");
 
 		initChat();
@@ -97,6 +104,7 @@ public class Chat {
 		while(name==null){
 			name = getInput();
 		}
+		gui.setName(name);
 		print(system + "Do you want to create a new room? [y]/[n] ");
 
 		if(getInput().equals("y")){
@@ -119,7 +127,13 @@ public class Chat {
 				print(system + "please enter the internet-adress of a chat room: ");
 				internetAddress = getInput();
 				enterPort();
-				client = new Client(internetAddress, port, name);
+				try{
+					client = new Client(internetAddress, port, name);
+				}catch(Exception e){
+					System.err.println(e.toString());
+					printLn(system + "not able to connect to: " + internetAddress + ":" + port);
+				}
+				
 				if(client == null){
 					printLn(system + "not able to connect to: " + internetAddress + ":" + port);
 				}
@@ -151,16 +165,19 @@ public class Chat {
 	}
 
 	public String getInput(){
-		in = new Scanner(System.in);
-		return in.nextLine();
+		String input = gui.getInput();
+		System.out.println(input);
+		return input;
 	}
 
 	public static void printLn(String text){
 		System.out.println("["+Log.getDate()+"] " + text);
+		gui.printLn("["+Log.getDate()+"] " + text);
 	}
 
 	public static void print(String text){
 		System.out.print("["+Log.getDate()+"] " + text);
+		gui.print("["+Log.getDate()+"] " + text);
 	}
 	
 	public static int getPort(){
