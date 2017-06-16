@@ -6,13 +6,18 @@ import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+
+import main.Chat;
 
 public class GUI extends JFrame{
 
@@ -98,6 +103,16 @@ public class GUI extends JFrame{
 		        	send.setBounds((int) getBounds().getWidth()-130+10, (int) (getBounds().getHeight()-110+10), 100, 50);
 		        }
 		});
+		
+
+
+		this.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent e){
+               Chat.writeLog();
+            }
+        });
+
+
 		
 		setVisible(true);		
 	}

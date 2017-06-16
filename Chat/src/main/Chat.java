@@ -1,5 +1,7 @@
 package main;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 import gui.GUI;
@@ -19,10 +21,14 @@ public class Chat {
 	private Scanner in;
 	
 	private static GUI gui;
+	
+	private static StringBuilder log;
 
 	public Chat() {
 		
 		gui = new GUI();
+		
+		log = new StringBuilder();
 		
 		printLn(system + "welcome to easychat");
 
@@ -36,7 +42,7 @@ public class Chat {
 					client.send(send);
 				}else{
 					switch(send){
-					case "/stop": running = false; break;
+					case "/stop": running = false; print("\n"); break;
 					default: 
 						if(send.startsWith("/name:")){
 							client.setName(send.substring(6));
@@ -85,7 +91,7 @@ public class Chat {
 				}				
 			}	
 		}
-
+		
 		if(server != null){
 			server.close();
 		}		
@@ -95,17 +101,21 @@ public class Chat {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		//print logfile
+		writeLog();
+		
 		System.exit(1);
 	}
 
 	private void initChat(){
-		print(system + "Enter your name: ");
+		printWithTimeStamp(system + "Enter your name: ");
 		String name = null;
 		while(name==null){
 			name = getInput();
 		}
 		gui.setName(name);
-		print(system + "Do you want to create a new room? [y]/[n] ");
+		printWithTimeStamp(system + "Do you want to create a new room? [y]/[n] ");
 
 		if(getInput().equals("y")){
 			port = -1;
@@ -124,7 +134,7 @@ public class Chat {
 			client = new Client(port, name);
 		}else{
 			while(client == null){
-				print(system + "please enter the internet-adress of a chat room: ");
+				printWithTimeStamp(system + "please enter the internet-adress of a chat room: ");
 				internetAddress = getInput();
 				enterPort();
 				try{
@@ -150,7 +160,7 @@ public class Chat {
 		port = -1;
 		while(port == -1){
 			testPort = -1;
-			print(system + "please enter a free port: ");
+			printWithTimeStamp(system + "please enter a free port: ");
 			try {
 				testPort = Integer.parseInt(getInput());
 				if(testPort <= 0 || testPort > 65536){
@@ -167,20 +177,45 @@ public class Chat {
 	public String getInput(){
 		String input = gui.getInput();
 		System.out.println(input);
+		log.append(input);
 		return input;
 	}
 
 	public static void printLn(String text){
 		System.out.println("["+Log.getDate()+"] " + text);
 		gui.printLn("["+Log.getDate()+"] " + text);
+		log.append("["+Log.getDate()+"] " + text + "\n");
 	}
 
-	public static void print(String text){
+	public static void printWithTimeStamp(String text){
 		System.out.print("["+Log.getDate()+"] " + text);
 		gui.print("["+Log.getDate()+"] " + text);
+		log.append("["+Log.getDate()+"] " + text);
+	}
+	
+	public static void print(String text){
+		System.out.print(text);
+		gui.print(text);
+		log.append(text);
 	}
 	
 	public static int getPort(){
 		return port;
+	}
+	
+	public static void writeLog(){
+		String dateStamp = Log.getDate().replaceAll(":", "_");
+		printLn("printing log...");
+		try{
+		    PrintWriter writer = new PrintWriter("EC_Log_" + dateStamp + ".txt", "UTF-8");
+		    String[] logText = log.toString().split("\n");
+		    for(String s: logText){
+		    	writer.println(s);
+		    }
+		    
+		    writer.close();
+		} catch (IOException e) {
+		   // do something
+		}
 	}
 }
