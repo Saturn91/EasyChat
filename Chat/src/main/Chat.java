@@ -104,6 +104,7 @@ public class Chat {
 			
 			if(server != null){
 				server.close();
+				server = null;
 			}	
 			
 			client.close();
