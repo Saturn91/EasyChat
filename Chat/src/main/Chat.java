@@ -1,5 +1,6 @@
 package main;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -32,80 +33,82 @@ public class Chat {
 		
 		printLn(system + "welcome to easychat");
 
-		initChat();
-		boolean running = true;
-		while(running){
-			String send = getInput();
-
-			if(send != null){
-				if(!send.startsWith("/")){
-					client.send(send);
-				}else{
-					switch(send){
-					case "/stop": running = false; print("\n"); break;
-					default: 
-						if(send.startsWith("/name:")){
-							client.setName(send.substring(6));
-							client.sendRaw(send);
-						}else{
-							if(send.startsWith("/help")){
-								Chat.printLn(system + ": /help -> open help");
-								Chat.printLn(system + ": /name:newName -> change Name to newName");
-								Chat.printLn(system + ": /online -> see who's online");
-								Chat.printLn(system + ": /ip -> see the ip");
-								Chat.printLn(system + ": /whisper@name:msg -> whisper only to name");
-								Chat.printLn(system + ": /stop -> end session and close programm");								
-								if(server!=null){
-									Chat.printLn(system + ": /kick:Name@reason -> kick \"Name\" for \"reason\"");
-									Chat.printLn(system + ": /del -> kick unkown clients");
-								}							
+		while(true){
+			initChat();
+			boolean running = true;
+			while(running){
+				String send = getInput();
+	
+				if(send != null){
+					if(!send.startsWith("/")){
+						client.send(send);
+					}else{
+						switch(send){
+						case "/stop": running = false; print("\n"); break;
+						default: 
+							if(send.startsWith("/name:")){
+								client.setName(send.substring(6));
+								client.sendRaw(send);
 							}else{
-								if(send.startsWith("/kick:")){
-									if(server != null){
-										client.sendRaw(send);
-									}else{
-										Chat.printLn(system + "no permission!");
-									}
+								if(send.startsWith("/help")){
+									Chat.printLn(system + ": /help -> open help");
+									Chat.printLn(system + ": /name:newName -> change Name to newName");
+									Chat.printLn(system + ": /online -> see who's online");
+									Chat.printLn(system + ": /ip -> see the ip");
+									Chat.printLn(system + ": /whisper@name:msg -> whisper only to name");
+									Chat.printLn(system + ": /print -> print chat text to .txt");
+									Chat.printLn(system + ": /stop -> end session and close programm");								
+									if(server!=null){
+										Chat.printLn(system + ": /kick:Name@reason -> kick \"Name\" for \"reason\"");
+										Chat.printLn(system + ": /del -> kick unkown clients");
+									}							
 								}else{
-									if(send.startsWith("/del")){
+									if(send.startsWith("/kick:")){
 										if(server != null){
 											client.sendRaw(send);
 										}else{
 											Chat.printLn(system + "no permission!");
 										}
 									}else{
-										if(send.startsWith("/online")){
+										if(send.startsWith("/del")){
 											if(server != null){
-												server.printNamesAndIp();
-											}else{
 												client.sendRaw(send);
+											}else{
+												Chat.printLn(system + "no permission!");
 											}
 										}else{
-											client.sendRaw(send);
-										}										
-									}									
+											if(send.startsWith("/online")){
+												if(server != null){
+													server.printNamesAndIp();
+												}else{
+													client.sendRaw(send);
+												}
+											}else{
+												if(send.startsWith("/print")){
+													writeLog();
+												}else{
+													client.sendRaw(send);
+												}											
+											}										
+										}									
+									}
 								}
 							}
-						}
-					}					
-				}				
-			}	
+						}					
+					}				
+				}	
+			}
+			
+			if(server != null){
+				server.close();
+			}		
+			client.close();
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
-		
-		if(server != null){
-			server.close();
-		}		
-		client.close();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		//print logfile
-		writeLog();
-		
-		System.exit(1);
 	}
 
 	private void initChat(){
@@ -177,7 +180,7 @@ public class Chat {
 	public String getInput(){
 		String input = gui.getInput();
 		System.out.println(input);
-		log.append(input);
+		log.append(input + "\n");
 		return input;
 	}
 
@@ -207,7 +210,9 @@ public class Chat {
 		String dateStamp = Log.getDate().replaceAll(":", "_");
 		printLn("printing log...");
 		try{
-		    PrintWriter writer = new PrintWriter("EC_Log_" + dateStamp + ".txt", "UTF-8");
+			File dir = new File("EasyChatLog");
+			dir.mkdir();
+		    PrintWriter writer = new PrintWriter("EasyChatLog/EC_Log_" + dateStamp + ".txt", "UTF-8");
 		    String[] logText = log.toString().split("\n");
 		    for(String s: logText){
 		    	writer.println(s);
@@ -215,7 +220,8 @@ public class Chat {
 		    
 		    writer.close();
 		} catch (IOException e) {
-		   // do something
+		   
 		}
+		printLn("saved: " + "EasyChatLog/EC_Log_" + dateStamp + ".txt");
 	}
 }

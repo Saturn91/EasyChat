@@ -79,7 +79,6 @@ public class Client implements Runnable{
 			} catch (IOException e) {}
 		}
 		Chat.printLn(Chat.system + "client closed");
-		Log.printLn("Client-Thread got closed", getClass().getName(), 3);
 	}
 
 	public void send(String message){
