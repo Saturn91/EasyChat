@@ -23,31 +23,25 @@ public class Client implements Runnable{
 	private boolean running = true;
 	
 	private String name;
-
-	public Client(int port, String name) {
-		this.name = name;
-		Log.printLn("--starting Client--", getClass().getName(), 1);
-		try {
-			client = new Socket("localhost", port);
-		} catch (UnknownHostException e) {
-			Log.printErrorLn("unknown host!", getClass().getName(), 1);
-		} catch (IOException e) {
-			Log.printErrorLn("not able to start client", getClass().getName(), 1);
-		}
-		init();
-	}
-
-	public Client(String inetAdress, int port, String name) {
+	
+	private boolean online = false;
+	
+	public void setUp(String inetAdress, int port, String name){
 		this.name = name;
 		Log.printLn("--starting Client--", getClass().getName(), 1);
 		try {
 			client = new Socket(inetAdress, port);
+			init();
+			online = true;
 		} catch (UnknownHostException e) {
 			Log.printErrorLn("unknown host!", getClass().getName(), 1);
+			Chat.printLn("unknown host!");
+			online = false;
 		} catch (IOException e) {
 			Log.printErrorLn("not able to start client", getClass().getName(), 1);
-		}
-		init();
+			Chat.printLn("not able to start client");
+			online = false;
+		}		
 	}
 
 	public void init(){
@@ -79,6 +73,7 @@ public class Client implements Runnable{
 			} catch (IOException e) {}
 		}
 		Chat.printLn(Chat.system + "client closed");
+		Chat.endSession();
 	}
 
 	public void send(String message){
@@ -95,6 +90,10 @@ public class Client implements Runnable{
 
 	public void setName(String name) {
 		this.name = name;		
+	}
+	
+	public boolean isOnline(){
+		return online;
 	}
 
 

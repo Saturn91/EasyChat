@@ -141,5 +141,9 @@ public class GUI extends JFrame{
 	public void setName(String name){
 		setTitle("Easy-Chat by Saturn91 - " + name);
 	}
+	
+	public static void clearText(){
+		textOutput.setText("");
+	}
 
 }

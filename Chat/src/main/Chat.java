@@ -24,6 +24,8 @@ public class Chat {
 	private static GUI gui;
 	
 	private static StringBuilder log;
+	
+	private volatile static boolean running = false;
 
 	public Chat() {
 		
@@ -35,7 +37,7 @@ public class Chat {
 
 		while(true){
 			initChat();
-			boolean running = true;
+			running = true;
 			while(running){
 				String send = getInput();
 	
@@ -102,12 +104,13 @@ public class Chat {
 			if(server != null){
 				server.close();
 			}		
-			client.close();
+			
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			GUI.clearText();
 		}
 	}
 
@@ -119,7 +122,7 @@ public class Chat {
 		}
 		gui.setName(name);
 		printWithTimeStamp(system + "Do you want to create a new room? [y]/[n] ");
-
+		client = new Client();
 		if(getInput().equals("y")){
 			port = -1;
 
@@ -134,14 +137,14 @@ public class Chat {
 			}
 
 			printLn(system + "opened a room at: " + server.getIp() + ":" + port);
-			client = new Client(port, name);
+			client.setUp("localhost", port, name);
 		}else{
-			while(client == null){
+			while(!client.isOnline()){
 				printWithTimeStamp(system + "please enter the internet-adress of a chat room: ");
 				internetAddress = getInput();
 				enterPort();
 				try{
-					client = new Client(internetAddress, port, name);
+					client.setUp(internetAddress, port, name);
 				}catch(Exception e){
 					System.err.println(e.toString());
 					printLn(system + "not able to connect to: " + internetAddress + ":" + port);
@@ -223,5 +226,9 @@ public class Chat {
 		   
 		}
 		printLn("saved: " + "EasyChatLog/EC_Log_" + dateStamp + ".txt");
+	}
+	
+	public static void endSession(){
+		running = false;
 	}
 }
