@@ -2,11 +2,10 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Scrollbar;
 import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -21,8 +20,6 @@ public class GUI extends JFrame{
 	
 	private static TextArea textOutput;
 	
-	private StringBuilder outputText;
-	
 	private JTextField input;
 	private volatile boolean newInput;
 	
@@ -30,31 +27,37 @@ public class GUI extends JFrame{
 	
 	private Font font = new Font("Courier New", Font.BOLD, 18);
 	
+	private static int xComponent = 10;
+	private static int componentMaxWidth = 720;
+	
+	private static int yTextOutput = 10;
+	
+	private static int sendHeight = 50;
+	
+	
+	
 	public GUI(){
 		super("Easy-Chat by Saturn91");
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(750, 900);
-		setResizable(false);
+		setSize(750, 460);
+		//setResizable(false);
 		setLocation(150, 150);		
 		setLayout(null);	
 		setBackground(Color.DARK_GRAY);
 		
-		outputText = new StringBuilder();
-		
 		textOutput = new TextArea();
 		textOutput.setEditable(false);
-		textOutput.setBounds(10, 10, 720, 800);
 		textOutput.setFont(font);
 		textOutput.setForeground(Color.GREEN);
 		textOutput.setBackground(Color.DARK_GRAY);
 		textOutput.setFocusable(false);
 		JScrollPane jsp = new JScrollPane(textOutput, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setBounds(10, 10, 720, 800);
+		jsp.setBounds(xComponent, yTextOutput, componentMaxWidth, (int) (getBounds().getHeight()-110));
 		add(jsp);
 		
 		input = new JTextField("name");
-		input.setBounds(10, 810, 720, 50);
+		input.setBounds(10, 360, 720, sendHeight);
 		
 		input.setFont(font);
 		input.setForeground(Color.GREEN);
@@ -62,7 +65,9 @@ public class GUI extends JFrame{
 		
 		Action action = new AbstractAction()
 		{
-		    @Override
+			private static final long serialVersionUID = 2L;
+
+			@Override
 		    public void actionPerformed(ActionEvent e)
 		    {
 		        newInput = true;
@@ -72,11 +77,11 @@ public class GUI extends JFrame{
 		input.addActionListener(action);
 		input.requestFocus();
 		JScrollPane jsp2 = new JScrollPane(input, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp2.setBounds(10, 810, 620, 50);
+		jsp2.setBounds(10, (int) (getBounds().getHeight()-110+10), 620, 50);
 		add(jsp2);
 		
 		send = new JButton("Send");
-		send.setBounds(630, 810, 100, 50);
+		send.setBounds(630, (int) (getBounds().getHeight()-110+10), 100, 50);
 		send.setBackground(Color.DARK_GRAY);
 		send.setForeground(Color.lightGray);
 		send.setFont(font);
@@ -84,6 +89,15 @@ public class GUI extends JFrame{
 		send.addActionListener(action);
 		
 		add(send);
+		
+		addComponentListener(new ComponentAdapter() 
+		{  
+		        public void componentResized(ComponentEvent evt) {		        	
+		        	jsp.setBounds(xComponent, yTextOutput, (int) getBounds().getWidth()-30, (int) (getBounds().getHeight()-110));
+		        	jsp2.setBounds(10, (int) (getBounds().getHeight()-110+10), (int) getBounds().getWidth()-130, 50);
+		        	send.setBounds((int) getBounds().getWidth()-130+10, (int) (getBounds().getHeight()-110+10), 100, 50);
+		        }
+		});
 		
 		setVisible(true);		
 	}
