@@ -40,13 +40,12 @@ public class Chat {
 			running = true;
 			while(running){
 				String send = getInput();
-	
 				if(send != null){
 					if(!send.startsWith("/")){
 						client.send(send);
 					}else{
 						switch(send){
-						case "/stop": running = false; print("\n"); break;
+						case "/stop": print("\n"); running = false; break;
 						default: 
 							if(send.startsWith("/name:")){
 								client.setName(send.substring(6));
@@ -96,14 +95,18 @@ public class Chat {
 									}
 								}
 							}
-						}					
+						}
+						
+						
 					}				
 				}	
 			}
 			
 			if(server != null){
 				server.close();
-			}		
+			}	
+			
+			client.close();
 			
 			try {
 				Thread.sleep(2000);

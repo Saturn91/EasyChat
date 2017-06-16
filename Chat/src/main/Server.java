@@ -17,6 +17,8 @@ public class Server {
 	private int onlineCounter = 0;
 
 	private boolean running = true;
+	
+	public static final String SHUTDOWN = "|SHUTDOWN|";
 
 	public Server(int port){
 		try {
@@ -111,7 +113,12 @@ public class Server {
 			try {
 				while ((s = in.readLine()) != null) {
 					if(!s.startsWith("/")){
-						sendtoAll(s);
+						if(s.contains(SHUTDOWN)){
+							running = false;
+							break;
+						}else{
+							sendtoAll(s);
+						}						
 					}else{
 						if(s.startsWith("/name:")){
 							if(name != null){

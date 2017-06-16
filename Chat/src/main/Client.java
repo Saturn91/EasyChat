@@ -20,7 +20,7 @@ public class Client implements Runnable{
 	private PrintWriter out;
 	private BufferedReader in;
 
-	private boolean running = true;
+	private volatile boolean running = true;
 	
 	private String name;
 	
@@ -85,7 +85,9 @@ public class Client implements Runnable{
 	}
 
 	public void close(){
+		send(Server.SHUTDOWN);
 		running = false;
+		
 	}
 
 	public void setName(String name) {
